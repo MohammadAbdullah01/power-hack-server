@@ -23,7 +23,8 @@ async function run() {
         const powerBills = client.db("powerHack").collection("bills");
         app.get('/billing-list', async (req, res) => {
             const query = {};
-            const bills = await powerBills.findOne(query);
+            const cursor = powerBills.find(query);
+            const bills = await cursor.toArray();
             res.send(bills)
         })
     } finally {
