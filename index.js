@@ -1,9 +1,9 @@
 const express = require('express')
 const app = express()
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
-const ObjectId = require('mongodb').ObjectId;
+// const ObjectId = require('mongodb').ObjectId;
 const port = process.env.PORT || 5000
 
 app.use(express.json())
@@ -30,10 +30,31 @@ async function run() {
             res.send(bills)
         })
         //delete one bill
-        app.delete('/delete-billing/:id', async (req, res) => {
-            const id = req.params.id;
+        app.delete('/delete-billing/:name', async (req, res) => {
+            const id = req.params.name;
             const query = { _id: ObjectId(id) }
-            const result = await powerBills.deleteOne(query)
+            const result = await powerBills.deleteOne(query);
+            console.log(query);
+            res.send({ result: result, data: true })
+        })
+        //post / add a bill
+        app.post('/add-billing', async (req, res) => {
+            const bill = req.body;
+            const result = await powerBills.insertOne(bill)
+            res.send(result)
+        })
+        // update bill
+        app.put('/update-billing/:id', async (req, res) => {
+            const id = req.params.id;
+            const newBill = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    ...newBill
+                }
+            }
+            const result = await powerBills.updateOne(filter, updateDoc, options)
             res.send(result)
         })
     } finally {
