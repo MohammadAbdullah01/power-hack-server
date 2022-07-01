@@ -24,10 +24,19 @@ async function run() {
         const powerBills = client.db("powerHack").collection("bills");
         //get all bills
         app.get('/billing-list', async (req, res) => {
+            const pages = parseInt(req.query.page);
             const query = {};
             const cursor = powerBills.find(query);
-            const bills = await cursor.toArray();
+            let bills;
+            console.log(pages);
+            // if (pages) {
+            bills = await cursor.skip(pages * 10).limit(10).toArray()
+            // }
+            // else {
+            //     bills = await cursor.toArray()
+            // }
             res.send(bills)
+
         })
         //delete one bill
         app.delete('/delete-billing/:name', async (req, res) => {
@@ -56,6 +65,11 @@ async function run() {
             }
             const result = await powerBills.updateOne(filter, updateDoc, options)
             res.send(result)
+        })
+        //get amount 
+        app.get('/total-bills', async (req, res) => {
+            const count = await powerBills.countDocuments()
+            res.send({ count: count })
         })
     } finally {
         // await client.close();
